@@ -2,11 +2,14 @@ package au.edu.unsw.soacourse.topdownclient;
 
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import au.edu.unsw.soacourse.topdown.*;
@@ -18,6 +21,8 @@ public class MarketServiceController {
 	@Autowired
 	private TopDownSimpleService simple; //this is instantiated by jaxws:client id=simple in dispatcher-servlet.xml
 	//private MarketDataUtilService util; //this is instantiated by jaxws:client id=util in dispatcher-servlet.xml
+
+	String EventSetIds = "";
 
 	//@RequestMapping("/importMarket")
 	public String processImportMarketData(ModelMap model) throws Exception {
@@ -54,23 +59,75 @@ public class MarketServiceController {
 		return "processDownloadFile";
 	}
 
-	@RequestMapping(value="/index", method=RequestMethod.POST)
-	public String showIndex(ModelMap model,@ModelAttribute("action")String action){
-		if (action!=null){
-			System.out.println("action is " + action);
-			if (model.get("action").equals("importMarket")){
-				System.out.println("importMarket");
-			}else if (model.get("action").equals("downloadFile")){
-				System.out.println("downloadFile");
+	@RequestMapping(value="/importMarket", method=RequestMethod.POST)
+	public String importMarket(HttpServletRequest req, ModelMap model,@ModelAttribute("importMarketBean")ImportMarketBean importMarketBean){
+		if (importMarketBean!=null){
+			System.out.println("Sec: " + importMarketBean.getSec());
+			System.out.println("start: " + importMarketBean.getStartDate());
+			System.out.println("end: " + importMarketBean.getEndDate());
+			System.out.println("url: " + importMarketBean.getDataSourceURL());
+
+			//create request
+			ImportMarketDataRequest request = new ImportMarketDataRequest();
+			request.setSec(importMarketBean.getSec());
+			request.setStartDate(importMarketBean.getStartDate());
+			request.setEndDate(importMarketBean.getEndDate());
+			request.setDataSource(importMarketBean.getDataSourceURL());
+
+			//call the web service
+			try {
+				ImportMarketDataResponse response = simple.importMarketData(request);
+				EventSetIds += response.getReturnData() + ", ";
+				req.getSession().setAttribute("eventSetIDs", EventSetIds);
+			} catch (ImportMarketFaultMsg e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}else{
-			System.out.println("does not contain an action");
+			System.out.println("importMarketBean is null");
 		}
-		return "index";
+		return "redirect:index";
 	}
-	
+
+	@RequestMapping(value="/downloadFile", method=RequestMethod.POST)
+	public String downloadFile(HttpServletRequest req, ModelMap model, @ModelAttribute("downloadFileBean")DownloadFileBean downloadFileBean){
+		if (downloadFileBean != null){
+			System.out.println("eventsetid: " + downloadFileBean.getEventSetID());
+			
+			//create request
+			DownloadFileRequest request = new DownloadFileRequest();
+			request.setEventSetID(downloadFileBean.getEventSetID());
+			
+			// Call the web service 
+			try {
+				DownloadFileResponse response = simple.downloadFile(request);
+				req.getSession().setAttribute("downloadURL", response.getDataURL());
+			} catch (DownloadFileFaultMsg e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}else{
+			System.out.println("importMarketBean is null");
+		}
+		return "redirect:index";
+	}
+
 	@RequestMapping(value="/index", method=RequestMethod.GET)
-	public String indexGET(){
+	public String indexGET(HttpServletRequest request, ModelMap model){
+		model.addAttribute("downloadFileBean", new DownloadFileBean());
+		model.addAttribute("importMarketBean", new ImportMarketBean());
+		
+		//Show eventsetIDs if available
+		String sessionEventSetIDs = (String) request.getSession().getAttribute("eventSetIDs");
+		if (sessionEventSetIDs != null){
+			request.setAttribute("eventSetIDs", sessionEventSetIDs);
+		}
+		
+		//Show downloadURL if available
+		String sessionDownloadURL = (String) request.getSession().getAttribute("downloadURL");
+		if (sessionDownloadURL != null){
+			request.setAttribute("downloadURL", sessionDownloadURL);
+		}
 		return "index";
 	}
 
