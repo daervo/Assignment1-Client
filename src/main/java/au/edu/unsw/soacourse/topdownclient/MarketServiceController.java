@@ -20,7 +20,7 @@ public class MarketServiceController {
 	// TODO: Add the TopDownSimpleService interface as a member of the controller
 	@Autowired
 	private TopDownSimpleService simple; //this is instantiated by jaxws:client id=simple in dispatcher-servlet.xml
-	//private MarketDataUtilService util; //this is instantiated by jaxws:client id=util in dispatcher-servlet.xml
+	private MarketDataUtilService util; //this is instantiated by jaxws:client id=util in dispatcher-servlet.xml
 
 	String EventSetIds = "";
 
@@ -60,62 +60,84 @@ public class MarketServiceController {
 	}
 
 	@RequestMapping(value="/importMarket", method=RequestMethod.POST)
-	public String importMarket(HttpServletRequest req, ModelMap model,@ModelAttribute("importMarketBean")ImportMarketBean importMarketBean){
-		if (importMarketBean!=null){
-			System.out.println("Sec: " + importMarketBean.getSec());
-			System.out.println("start: " + importMarketBean.getStartDate());
-			System.out.println("end: " + importMarketBean.getEndDate());
-			System.out.println("url: " + importMarketBean.getDataSourceURL());
+	public String importMarket(HttpServletRequest httpRequest){
+			System.out.println("Sec: " + httpRequest.getParameter("sec"));
+			System.out.println("start: " + httpRequest.getParameter("startDate"));
+			System.out.println("end: " + httpRequest.getParameter("endDate"));
+			System.out.println("url: " + httpRequest.getParameter("dataSourceURL"));
 
 			//create request
 			ImportMarketDataRequest request = new ImportMarketDataRequest();
-			request.setSec(importMarketBean.getSec());
-			request.setStartDate(importMarketBean.getStartDate());
-			request.setEndDate(importMarketBean.getEndDate());
-			request.setDataSource(importMarketBean.getDataSourceURL());
+			request.setSec((String) httpRequest.getParameter("sec"));
+			request.setStartDate((String) httpRequest.getParameter("startDate"));
+			request.setEndDate((String) httpRequest.getParameter("endDate"));
+			request.setDataSource((String) httpRequest.getParameter("dataSourceURL"));
 
 			//call the web service
 			try {
 				ImportMarketDataResponse response = simple.importMarketData(request);
 				EventSetIds += response.getReturnData() + ", ";
-				req.getSession().setAttribute("eventSetIDs", EventSetIds);
+				httpRequest.getSession().setAttribute("eventSetIDs", EventSetIds);
+				httpRequest.getSession().setAttribute("importMarketStatus", "Success!");
 			} catch (ImportMarketFaultMsg e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				httpRequest.getSession().setAttribute("importMarketStatus", e.getLocalizedMessage());
 			}
-		}else{
-			System.out.println("importMarketBean is null");
-		}
 		return "redirect:index";
 	}
 
 	@RequestMapping(value="/downloadFile", method=RequestMethod.POST)
-	public String downloadFile(HttpServletRequest req, ModelMap model, @ModelAttribute("downloadFileBean")DownloadFileBean downloadFileBean){
-		if (downloadFileBean != null){
-			System.out.println("eventsetid: " + downloadFileBean.getEventSetID());
+	public String downloadFile(HttpServletRequest httpRequest){
+			System.out.println("eventsetid: " + httpRequest.getParameter("eventSetID"));
 			
 			//create request
 			DownloadFileRequest request = new DownloadFileRequest();
-			request.setEventSetID(downloadFileBean.getEventSetID());
+			request.setEventSetID((String)httpRequest.getParameter("eventSetID"));
 			
 			// Call the web service 
 			try {
 				DownloadFileResponse response = simple.downloadFile(request);
-				req.getSession().setAttribute("downloadURL", response.getDataURL());
+				httpRequest.getSession().setAttribute("downloadURL", response.getDataURL());
 			} catch (DownloadFileFaultMsg e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				httpRequest.getSession().setAttribute("downloadURL", e.getLocalizedMessage());
 			}
-		}else{
-			System.out.println("importMarketBean is null");
-		}
 		return "redirect:index";
 	}
 
+	@RequestMapping(value="/summariseMarketData", method=RequestMethod.POST)
+	public String summariseMarketData(HttpServletRequest httpRequest){
+			System.out.println("eventsetid: " + httpRequest.getParameter("eventSetID"));
+			
+			//create request
+			SummariseMarketDataRequest request = new SummariseMarketDataRequest();
+			request.setEventSetID((String)httpRequest.getParameter("eventSetID"));
+			
+			if (util != null){
+			// Call the web service 
+			try {
+				SummariseMarketDataResponse response = util.summariseMarketData(request);
+				httpRequest.getSession().setAttribute("summariseMarketData_eventSetID", response.getEventSetId());
+				httpRequest.getSession().setAttribute("summariseMarketData_sec", response.getSec());
+				httpRequest.getSession().setAttribute("summariseMarketData_startDate", response.getStartDate());
+				httpRequest.getSession().setAttribute("summariseMarketData_endDate", response.getEndDate());
+				httpRequest.getSession().setAttribute("summariseMarketData_currencyCode", response.getCurrencyCode());
+				httpRequest.getSession().setAttribute("summariseMarketData_fileSize", response.getFileSize());
+			} catch (SummariseMarketFaultMsg e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				httpRequest.getSession().setAttribute("summariseMarketData_error", e.getLocalizedMessage());
+			}
+			}else{
+				System.out.println("util is null");
+			}
+		return "redirect:util";
+	}
+
 	@RequestMapping(value="/index", method=RequestMethod.GET)
-	public String indexGET(HttpServletRequest request, ModelMap model){
-		model.addAttribute("downloadFileBean", new DownloadFileBean());
-		model.addAttribute("importMarketBean", new ImportMarketBean());
+	public String indexGET(HttpServletRequest request){
 		
 		//Show eventsetIDs if available
 		String sessionEventSetIDs = (String) request.getSession().getAttribute("eventSetIDs");
@@ -129,6 +151,18 @@ public class MarketServiceController {
 			request.setAttribute("downloadURL", sessionDownloadURL);
 		}
 		return "index";
+	}
+	
+	@RequestMapping(value="/utilPage", method=RequestMethod.GET)
+	public String utilPageGET(HttpServletRequest request){
+		
+		//Show eventsetIDs if available
+		String sessionEventSetIDs = (String) request.getSession().getAttribute("eventSetIDs");
+		if (sessionEventSetIDs != null){
+			request.setAttribute("eventSetIDs", sessionEventSetIDs);
+		}
+			
+		return "util";
 	}
 
 }

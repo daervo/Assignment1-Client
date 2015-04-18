@@ -63,25 +63,6 @@
 								<wsdlOption>
 									<wsdl>http://localhost:8080/Assignment1/TopDownSimpleService?wsdl</wsdl>
 								</wsdlOption>
-							</wsdlOptions>
-						</configuration>
-						<goals>
-							<goal>wsdl2java</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.cxf</groupId>
-				<artifactId>cxf-codegen-plugin</artifactId>
-				<version>3.0.4</version>
-				<executions>
-					<execution>
-						<id>generate-sources</id>
-						<phase>generate-sources</phase>
-						<configuration>
-							<sourceRoot>src/main/java-generated</sourceRoot>
-							<wsdlOptions>
 								<wsdlOption>
 									<wsdl>http://localhost:8080/Assignment1/MarketDataUtilService?wsdl</wsdl>
 								</wsdlOption>

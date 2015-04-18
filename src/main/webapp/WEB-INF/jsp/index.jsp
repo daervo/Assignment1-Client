@@ -14,38 +14,40 @@
 	<h2>Current EventSetIds:</h2>
 	<c:out value="${eventSetIDs}"></c:out>
 	<!-- The return value from the service is: <b><c:out value="${returnData}"></c:out></b>-->
-	<form:form method="POST" action="importMarket"
-		modelAttribute="importMarketBean">
+	<form method="POST" action="importMarket">
 		<h2>Import Market Data</h2>
 		<table>
 			<tr>
-				<td><form:label path="sec">Sec: </form:label></td>
-				<td><form:input path="sec" /></td>
+				<td>Sec:</td>
+				<td><input type="text" name="sec" /></td>
 			</tr>
 			<tr>
-				<td><form:label path="startDate">Start Date (eg. 01-01-2010): </form:label></td>
-				<td><form:input path="startDate" /></td>
+				<td>Start Date (eg. 01-01-2010):</td>
+				<td><input type="text" name="startDate" /></td>
 			</tr>
 			<tr>
-				<td><form:label path="endDate">End Date (eg. 01-01-2010): </form:label></td>
-				<td><form:input path="endDate" /></td>
+				<td>End Date (eg. 01-01-2010):</td>
+				<td><input type="text" name="endDate" /></td>
 			</tr>
 			<tr>
-				<td><form:label path="dataSourceURL">Source URL (http://au.finance.yahoo.com): </form:label></td>
-				<td><form:input path="dataSourceURL" /></td>
+				<td>Source URL (http://au.finance.yahoo.com):</td>
+				<td><input type="text" name="dataSourceURL" /></td>
 			</tr>
 			<tr>
 				<td colspan="2"><input type="submit" value="Submit" /></td>
 			</tr>
 		</table>
-	</form:form>
-	<form:form method="POST" action="downloadFile"
-		modelAttribute="downloadFileBean">
+	<c:out value="${importMarketStatus}"></c:out>
+	</form>
+	<form method=POST action="downloadFile">
 		<h2>Download File</h2>
-		<form:label path="eventSetID">EventSetID: </form:label>
-		<form:input path="eventSetID" />
+		EventSetID:<input type="text" name="eventSetID" />
 		<input type="submit" value="Submit" /><br/>
-	</form:form>
+	</form>
 	<c:out value="${downloadURL}"></c:out>
+	<form method=GET action="utilPage">
+		<h2>Market Data Utils</h2>
+		<input type="submit" value="Go To Market Data Util Page" /><br/>
+	</form>
 </body>
 </html>
