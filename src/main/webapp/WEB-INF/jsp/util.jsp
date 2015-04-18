@@ -19,13 +19,41 @@
 		EventSetID:<input type="text" name="eventSetID" /> <input
 			type="submit" value="Submit" /><br />
 	</form>
-	<c:out value="${summariseMarketData_error}"></c:out>
-	<c:out value="${summariseMarketData_eventSetID}"></c:out>
-	<c:out value="${summariseMarketData_sec}"></c:out>
-	<c:out value="${summariseMarketData_startDate}"></c:out>
-	<c:out value="${summariseMarketData_endDate}"></c:out>
-	<c:out value="${summariseMarketData_currencyCode}"></c:out>
-	<c:out value="${summariseMarketData_fileSize}"></c:out>
+	<c:out value="${summariseMarketData_error}"></c:out><br />
+	<c:out value="${summariseMarketData_eventSetID}"></c:out><br />
+	<c:out value="${summariseMarketData_sec}"></c:out><br />
+	<c:out value="${summariseMarketData_startDate}"></c:out><br />
+	<c:out value="${summariseMarketData_endDate}"></c:out><br />
+	<c:out value="${summariseMarketData_currencyCode}"></c:out><br />
+	<c:out value="${summariseMarketData_fileSize}"></c:out><br />
+	<form method="POST" action="currencyConvert">
+		<h2>Currency Convert</h2>
+		<table>
+			<tr>
+				<td>EventSetID:</td>
+				<td><input type="text" name="eventSetID" /></td>
+			</tr>
+			<tr>
+				<td>Target Currency (eg. USD, EUR):</td>
+				<td><input type="text" name="targetCurrency" /></td>
+			</tr>
+			<tr>
+				<td>Target Date (eg. YYYY-MM-DD):</td>
+				<td><input type="text" name="targetDate" /></td>
+			</tr>
+			<tr>
+				<td colspan="2"><input type="submit" value="Submit" /></td>
+			</tr>
+		</table>
+	<c:out value="${currencyConvert_output}"></c:out><br />
+	</form>
+	<form method=POST action="visualiseMarketData">
+		<h2>Visualise Market Data</h2>
+		EventSetID:<input type="text" name="eventSetID" /> <input
+			type="submit" value="Submit" /><br />
+	<c:out value="${visualiseMarketData_output}"></c:out><br />
+	<c:out value="${visualiseMarketData_error}"></c:out><br />
+	</form>
 	<form method=GET action="index">
 		<input type="submit" value="Go Back" /><br />
 	</form>

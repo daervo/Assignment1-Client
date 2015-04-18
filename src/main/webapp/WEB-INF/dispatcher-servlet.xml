@@ -22,13 +22,13 @@
 	</bean>
 
 	<!-- CXF JAX-WS Client bean definition. -->
-	<jaxws:client id="simple"
-		address="http://localhost:8080/Assignment1/TopDownSimpleService"
-		serviceClass="au.edu.unsw.soacourse.topdown.TopDownSimpleService">
-	</jaxws:client>
 	<jaxws:client id="util"
 		address="http://localhost:8080/Assignment1/MarketDataUtilService"
 		serviceClass="au.edu.unsw.soacourse.topdown.MarketDataUtilService">
+	</jaxws:client>
+	<jaxws:client id="simple"
+		address="http://localhost:8080/Assignment1/TopDownSimpleService"
+		serviceClass="au.edu.unsw.soacourse.topdown.TopDownSimpleService">
 	</jaxws:client>
 
 
